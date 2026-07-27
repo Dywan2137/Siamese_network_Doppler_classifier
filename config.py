@@ -6,15 +6,15 @@ maps (12-class and 4-class) are the main thing you switch between.
 
 # data
 DATA_DIR = "data"                  # scraper writes here; classifier reads here
-DATASET_ROOT = "data/m9-bayonet"   # folder of <finish>/<phase>/*.png
+DATASET_ROOT = "data/m9-bayonet"   
 
-# The M9 Bayonet blade sits in a fixed region of each render, so a fixed crop
-# isolates the finish and drops the background. (left, top, bottom-to-remove)
+# Because the original image is a full knife we need to crop the image to have only the blade.
+# The parameters below may differ and most likely will differ for other knives if you chose to do them as well.  
 CROP_LEFT, CROP_TOP, CROP_BOTTOM_REMOVE = 1321, 329, 234
 IMG_H, IMG_W = 64, 338
 
-MAX_PER_CLASS = 30   # cap images per class; the whole point is "little data"
-TEST_FRAC = 0.20
+MAX_PER_CLASS = 10   # images per class
+TEST_FRAC = 0.80
 SEED = 42
 
 # classes
@@ -30,7 +30,7 @@ LABELS_12 = {
 }
 
 
-# Only gamma doppler phase 3 and 4 and doppler phase 3 and 4 are hard to tell apart so that is what we are focusing on.
+# Here is another problem defined where we only compare the 4 most similar to each other classes
 LABELS_4 = {
     ("doppler",       "phase-3"): 0,
     ("doppler",       "phase-4"): 1,
@@ -44,10 +44,10 @@ IDX_TO_LABEL = {v: f"{k[0]} / {k[1]}" for k, v in LABELS.items()}
 NUM_CLASSES = len(LABELS)
 
 # model
-EMBEDDING_DIM = 16   # small on purpose, 64 worked too but was "too easy"
+EMBEDDING_DIM = 16   # tested on 8, 16, 32 and 64 but everything above 16 worked too easy
 
 # training
-EPOCHS = 10          # more makes no real difference
+EPOCHS = 10          # doesnt really matter you can train on 1 epoch and it still will have great results
 LR = 1e-3
 BATCH_SIZE = 32
 MARGIN = 1.0         # triplet-loss margin
@@ -56,15 +56,12 @@ MARGIN = 1.0         # triplet-loss margin
 KNN_NEIGHBORS = 3
 
 # scraper
-# csgoskins.gg serves pattern renders straight from a CDN, no scraping of the
-# page needed: <CDN>/<knife>-<finish>-<variant>/<seed>.png
 CDN_BASE = "https://cdn.csgoskins.gg/public/images/patterns/v1"
 SCRAPE_N_SEEDS = 15        # pattern seeds per variant, you can add to that but the images are quite big.
-SCRAPE_DELAY = 0.3          # seconds between requests — be polite to the CDN
+SCRAPE_DELAY = 0.3          # seconds between requests
 SCRAPE_SEED_MAX = 1000      # seeds are drawn from 1 to 1000
 
-# Which knives to pull. The classifier only uses m9-bayonet, but the CDN has
-# the same finishes for every knife, so the scraper can fetch the lot.
+# you can scrape images for all knives if you wish
 SCRAPE_KNIVES = [
     "m9-bayonet"
     #, "karambit", "butterfly-knife", "gut-knife", "flip-knife",
